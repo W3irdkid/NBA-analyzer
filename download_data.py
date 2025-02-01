@@ -71,15 +71,6 @@ def get_game_info(game_id):
     return df
 
 
-#Get player game streaks
-def player_streak(player_id):
-    streaks = playergamestreakfinder.PlayerGameStreakFinder(player_id_nullable=player_id).get_dict()
-    columns = streaks['resultSets'][0]['headers']
-    rows = streaks['resultSets'][0]['rowSet']
-    df = pd.DataFrame(rows, columns=columns)
-    return df
-
-
 # Get Game Rotation
 def get_game_rotation(gameId):
     rotations = gamerotation.GameRotation(game_id=gameId).get_dict()
@@ -89,13 +80,56 @@ def get_game_rotation(gameId):
     return df
 
 
+def get_max_and_min_gameId(season):
+    gamelog = leaguegamelog.LeagueGameLog(season=season).get_dict()
+    columns = gamelog['resultSets'][0]['headers']
+    rows = gamelog['resultSets'][0]['rowSet']
+    df = pd.DataFrame(rows, columns=columns)
+    return df['GAME_ID'].max(), df['GAME_ID'].min()
 
-def player_streak_gt_pts(player_id, gt_pts):
-    streaks = playergamestreakfinder.PlayerGameStreakFinder(
-        player_id_nullable=player_id,
-        gt_pts_nullable=gt_pts
-    ).get_data_frames()[0]
-    return streaks
+def get_random_gameId(season):
+    gamelog = leaguegamelog.LeagueGameLog(season=season).get_dict()
+    columns = gamelog['resultSets'][0]['headers']
+    rows = gamelog['resultSets'][0]['rowSet']
+    df = pd.DataFrame(rows, columns=columns)
+    return df['GAME_ID'].sample().values[0]
+
+
+def get_game_rotation(game_id): # print list of players that played in the game
+    rotations = gamerotation.GameRotation(game_id=game_id).get_dict()
+    columns = rotations['resultSets'][0]['headers']
+    rows = rotations['resultSets'][0]['rowSet']
+    df = pd.DataFrame(rows, columns=columns)
+    return df['PERSON_ID']
+
+def get_playerInfo_regularSeason(player_id, seasonType='Regular Season'):
+    player = playercareerstats.PlayerCareerStats(player_id=player_id).get_dict()
+    columns = player['resultSets'][0]['headers']
+    rows = player['resultSets'][0]['rowSet']
+    df = pd.DataFrame(rows, columns=columns)
+    return df
+
+
+def get_playergamelog(player_id, season, seasonType='Regular Season'):
+    gameLog = PlayerGameLog(player_id=player_id, season=season).get_dict()
+    columns = gameLog['resultSets'][0]['headers']
+    rows = gameLog['resultSets'][0]['rowSet']
+    df = pd.DataFrame(rows, columns=columns)
+    return df
+
+df_log = get_playergamelog(player_id, "2023-24")
+print(df_log[["GAME_DATE", "MATCHUP", "MIN"]])
+
+
+
+
+
+
+
+
+
+
+    
 
 
 # Przykład: LeBron James, punkty >20
